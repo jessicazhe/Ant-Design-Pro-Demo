@@ -31,7 +31,7 @@ npm start
 ### Build project
 
 ```bash
-npm run buildeerwrwrwe吱吱吱吱吱吱吱吱
+npm run buildeerwrwrwe
 ```
 
 ### Check code style
