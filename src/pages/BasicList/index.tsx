@@ -28,8 +28,7 @@ const Index = () => {
                 setModalUri(
                     action.uri?.replace('/:\w+/g', (field) => {    //replace第一个参数是要替换的值，第二个是替换后的值    ：id ==> id
                         return record[field.replace(':', '')]
-                    }
-                    ) as string);
+                    }) as string);
                 setModalVisible(true);
                 break;
             default:
