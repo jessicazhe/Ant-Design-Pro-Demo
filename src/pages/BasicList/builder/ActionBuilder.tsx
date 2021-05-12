@@ -5,8 +5,8 @@ const ActionBuilder = (
     actions: BasicListApi.Action[] | undefined,
     actionHandler: BasicListApi.ActionHandler,
     //   loading: boolean,         //判断是否已经穿入完成，所以是boolean类型
-    loading: false,    //直接给默认值，一避免无值报错，二，可以不用在传false这个值
-    record: {},      //空对象
+    loading = false,    //直接给默认值，一避免无值报错，二，可以不用在传false这个值
+    record = {},      //空对象
 ) => {
     return (actions || []).map((action) => {
         if (action.component === 'button') {

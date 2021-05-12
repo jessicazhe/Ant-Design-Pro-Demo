@@ -5,14 +5,13 @@ import moment from 'moment';
 import FormBuilder from '../builder/FormBuilder';
 import ActionBuilder from '../builder/ActionBuilder';
 import { setFieldsAdaptor, submitFieldsAdaptor } from '../helper';
-
 const Modal = ({
   modalVisible,
   hideModal,
   modalUri,
 }: {
   modalVisible: boolean;
-  hideModal: () => void;
+  hideModal: (reload?: boolean) => void;
   modalUri: string;
 }) => {
   const [form] = Form.useForm();
@@ -25,9 +24,7 @@ const Modal = ({
       },
     },
   );
-
-//执行按钮以后，并在和后端交互前  给一个提示：正在处理中，交互完成之后，并把提示关掉
-  const request = useRequest(                       
+  const request = useRequest(
     (values: any) => {
       message.loading({ content: 'Processing...', key: 'process', duration: 0 });
       const { uri, method, ...formValues } = values;
@@ -47,21 +44,19 @@ const Modal = ({
           content: data.message,
           key: 'process',
         });
-        hideModal();
+        hideModal(true);
       },
       formatResult: (res: any) => {
         return res;
       },
     },
   );
-
   useEffect(() => {
     if (modalVisible) {
       form.resetFields();
       init.run();
     }
   }, [modalVisible]);
-
   useEffect(() => {
     if (init.data) {
       form.setFieldsValue(setFieldsAdaptor(init.data));
@@ -73,16 +68,25 @@ const Modal = ({
   };
 
   const onFinish = (values: any) => {
-    console.log(values);
     request.run(values);
   };
 
   const actionHandler = (action: BasicListApi.Action) => {
     switch (action.action) {
+
       case 'submit':
+          console.log(action,'action',form.getFieldsValue());
+          
         form.setFieldsValue({ uri: action.uri, method: action.method });
         form.submit();
         break;
+      case 'cancel':
+        hideModal();
+        break;
+      case 'reset':
+        form.resetFields();
+        break;
+
       default:
         break;
     }
@@ -92,8 +96,10 @@ const Modal = ({
       <AntdModal
         title={init?.data?.page?.title}
         visible={modalVisible}
-        onCancel={hideModal}
-        footer={ActionBuilder(init?.data?.layout?.actions[0]?.data, actionHandler, request.loading)}      //request里控制loading
+        onCancel={() => {
+          hideModal();
+        }}
+        footer={ActionBuilder(init?.data?.layout?.actions[0]?.data, actionHandler, request.loading)}
         maskClosable={false}
       >
         <Form

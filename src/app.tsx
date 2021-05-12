@@ -60,27 +60,27 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     },
     links: isDev
       ? [
-          <>
-            <LinkOutlined />
-            <span
-              onClick={() => {
-                window.open('/umi/plugin/openapi');
-              }}
-            >
-              openAPI 文档
+        <>
+          <LinkOutlined />
+          <span
+            onClick={() => {
+              window.open('/umi/plugin/openapi');
+            }}
+          >
+            openAPI 文档
             </span>
-          </>,
-          <>
-            <BookOutlined />
-            <span
-              onClick={() => {
-                window.open('/~docs');
-              }}
-            >
-              业务组件文档
+        </>,
+        <>
+          <BookOutlined />
+          <span
+            onClick={() => {
+              window.open('/~docs');
+            }}
+          >
+            业务组件文档
             </span>
-          </>,
-        ]
+        </>,
+      ]
       : [],
     menuHeaderRender: undefined,
     // 自定义 403 页面
@@ -95,32 +95,42 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
 const errorHandler = (error: ResponseError) => {
   // BizError => success: false               //业务类型错误 
   // RequestError => http erron                //请求错误
-
-  if (errorHandler.name === 'BizError') {
-    if (error.data.message) {        //判断有无错误，error.data.message是错误的位置
-      message.error({         //提示错误
-        content: error.data.message,   //属性一，给用户提示的错误的内容，即后端传过来的文本
-        key: 'process',          //属性二，每一个message创建好都有一个唯一的key值
-        duration: 20             //属性三，报错持续时间
-      });
-    } else {
+  switch (error.name) {
+    case 'BizError':
+      if (error.data.message) {        //判断有无错误，error.data.message是错误的位置
+        message.error({         //提示错误
+          content: error.data.message,   //属性一，给用户提示的错误的内容，即后端传过来的文本
+          key: 'process',          //属性二，每一个message创建好都有一个唯一的key值
+          duration: 20.             //属性三，报错持续时间
+        });
+      } else {
+        message.error({
+          content: '业务错误，请重试',
+          key: 'process',
+          duration: 20
+        })
+      }
+      break;
+    case 'ResponseError':
       message.error({
-        content: '业务错误，请重试',
+        content: `${error.response.status} ${error.response.statusText}. Please try again.`,
         key: 'process',
-        duration: 20
-      })
+        duration: 20,
+      });
+      break;
+    case 'TypeError':
+      message.error({
+        content: `Network error. Please try again.`,
+        key: 'process',
+        duration: 20,
+      });
+      break;
+    default:
+      break;
     }
-  }
-  if (errorHandler.name === 'ResponsetError') {
-    message.error({
-      content: `${error.response.status}${error.response.statusText}.请重试`,
-      key: 'process',
-      duration: 20
-    })
-  }
-  throw error;
 
-}
+    throw error;
+  };
 // https://umijs.org/zh-CN/plugins/plugin-request
 export const request: RequestConfig = {
   errorHandler,
